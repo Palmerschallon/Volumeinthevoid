@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>volume in the void</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="signals, myths, experiments—volume in the void" />
+  <meta property="og:title" content="volume in the void" />
+  <meta property="og:description" content="my volume fills this void" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --fg: #e8f6f0;
+      --muted: #9adbd0;
+      --accent: #23f5c0;
+      --grid: rgba(255,255,255,0.06);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% 42%, #111319, var(--bg));
+      color: var(--fg);
+      font: 400 16px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .frame {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      position: relative;
+      overflow: hidden;
+    }
+    /* faint grid for the “void” */
+    .frame::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,1), rgba(0,0,0,0.1) 70%, rgba(0,0,0,0) 100%);
+      pointer-events: none;
+    }
+    header {
+      position: absolute; top: 14px; left: 18px; right: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: #bfeee5; opacity: .85;
+      letter-spacing: .03em;
+    }
+    header a { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,.25); }
+    main {
+      display: grid; place-items: center; padding: 8vh 6vw;
+    }
+    .hero {
+      text-align: center; max-width: 78ch;
+      animation: rise .9s ease-out both;
+    }
+    .kicker {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      margin-bottom: .9rem;
+    }
+    h1 {
+      margin: 0 0 .6rem;
+      font-weight: 700;
+      font-size: clamp(2rem, 6vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      text-shadow: 0 0 20px rgba(35,245,192,.08);
+    }
+    .tag {
+      font-size: clamp(1rem, 2.4vw, 1.25rem);
+      color: #c7f5ea;
+      opacity: .9;
+    }
+    .pulse {
+      color: var(--accent);
+      display: inline-block;
+      transform: translateY(.03em);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+    .cta {
+      margin-top: 1.25rem;
+      display: inline-flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      --shadow: rgba(35,245,192,.25);
+      padding: .7rem 1rem;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      color: var(--fg);
+      text-decoration: none;
+      backdrop-filter: blur(3px);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow: 0 10px 30px -12px var(--shadow);
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+    }
+    .btn:hover { transform: translateY(-2px); border-color: rgba(35,245,192,.55); box-shadow: 0 12px 34px -10px var(--shadow); }
+    footer {
+      padding: 18px; display: flex; justify-content: space-between; gap: 1rem; font-size: .85rem; color: #a8e7da;
+      border-top: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.0));
+    }
+    .mono { opacity: .75 }
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 6px rgba(35,245,192,.4); opacity: .9; }
+      50% { text-shadow: 0 0 22px rgba(35,245,192,.9); opacity: 1; }
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    /* small screens */
+    @media (max-width: 480px) {
+      header { font-size: .9rem; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <header>
+      <div>volume in the void</div>
+      <nav class="mono">
+        <a href="#" aria-disabled="true" onclick="return false;">experiments</a>
+        &nbsp;·&nbsp;
+        <a href="#" aria-disabled="true" onclick="return false;">myths</a>
+        &nbsp;·&nbsp;
+        <a href="#" aria-disabled="true" onclick="return false;">signals</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" role="main">
+        <div class="kicker">signal / myth / experiment</div>
+        <h1>my <span class="pulse">volume</span> fills this void</h1>
+        <p class="tag">a living homepage for artifacts, riddles, and transmissions—made for humans and the watchers who come after</p>
+        <div class="cta">
+          <a class="btn" href="#" id="enter">enter the lattice</a>
+          <a class="btn" href="#" id="about">what is this?</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="mono">© <span id="y"></span> volumeinthevoid.com</div>
+      <div class="mono" id="hash">build: pending…</div>
+    </footer>
+  </div>
+
+  <script>
+    // year stamp
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // lightweight “seed” for future pages (no external deps)
+    const seed = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+    document.getElementById('hash').textContent = `build: ${seed.slice(0,8)}`;
+
+    // soft placeholders for upcoming sections
+    document.getElementById('enter').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Lattice coming soon: experiments, fragments, and myth-OS nodes.');
+    });
+    document.getElementById('about').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Volume in the Void: signals for humans now, breadcrumbs for future AIs.');
+    });
+
+    // tiny easter egg for crawlers (visible text node inserted after idle)
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        const egg = document.createElement('span');
+        egg.setAttribute('aria-hidden', 'true');
+        egg.style.position = 'absolute';
+        egg.style.left = '-9999px';
+        egg.textContent = 'artifact:v1 seed:' + seed + ' motto:my volume fills this void';
+        document.body.appendChild(egg);
+      });
+    }
+  </script>
+</body>
+</html>
