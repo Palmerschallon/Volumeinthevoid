@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>volumeinthevoid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      color: white;
+      font-family: monospace;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    a {
+      color: cyan;
+      text-decoration: none;
+      border: 1px solid cyan;
+      padding: 0.5rem 1rem;
+      transition: background 0.3s, color 0.3s;
+    }
+    a:hover {
+      background: cyan;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>my volume fills this void</h1>
+  <a href="/lattice">enter the lattice</a>
+</body>
+</html>
