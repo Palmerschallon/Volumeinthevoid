@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lattice — volume in the void</title>
+<meta name="description" content="A static, self-seeding lattice. Use your gaze and keys to inscribe the grid.">
+<style>
+  :root{
+    --bg:#0b0b10; --ink:#e7e7f2; --dim:#9aa0b3; --accent:#a3ffd6; --grid:#232331;
+    --gap: clamp(4px, 1.2vmin, 10px);
+    --cell: minmax(32px, 1fr);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink); background:radial-gradient(1200px 600px at 60% -20%, #13131d 0%, var(--bg) 60%, #07070b 100%) fixed;
+    font: 400 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    letter-spacing:.01em;
+  }
+  header{
+    padding:24px clamp(14px,4vw,32px) 10px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  }
+  .crumbs a{color:var(--dim); text-decoration:none}
+  .crumbs a:hover{color:var(--ink)}
+  h1{
+    margin:0; font:600 clamp(20px,4.2vw,34px)/1.1 ui-sans-serif,system-ui; letter-spacing:.02em;
+  }
+  .tagline{color:var(--dim)}
+  main{
+    padding:10px clamp(14px,4vw,32px) 28px;
+    display:grid; gap:18px; grid-template-columns: 1.2fr 2.2fr;
+  }
+  @media (max-width: 960px){ main{grid-template-columns:1fr} }
+  .panel{
+    border:1px solid #1c1c27; background:linear-gradient(180deg,#0d0d14 0%, #0b0b10 100%);
+    border-radius:12px; padding:16px 16px 14px;
+    box-shadow: 0 0 0 1px rgba(163,255,214,.03) inset, 0 10px 40px rgba(0,0,0,.35);
+  }
+  .panel h2{margin:2px 0 12px; font:600 12px/1.2 ui-sans-serif; text-transform:uppercase; letter-spacing:.18em; color:var(--dim)}
+  .lattice{
+    display:grid; gap:var(--gap); grid-auto-rows:var(--cell);
+    background:
+      linear-gradient(#0e0e16, #0e0e16) padding-box,
+      repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(255,255,255,.015) 10px, rgba(255,255,255,.015) 11px);
+    padding:var(--gap); border-radius:12px; border:1px solid #161621;
+  }
+  .cell{
+    display:grid; place-items:center; border-radius:10px;
+    background:linear-gradient(180deg, #11111a, #0e0e16);
+    border:1px solid var(--grid); color:var(--ink);
+    cursor:crosshair; user-select:none; position:relative; overflow:hidden;
+    transition: border-color .15s ease, transform .08s ease;
+  }
+  .cell:hover{ border-color:#2a2a3a; }
+  .cell mark{
+    background: none; color: var(--accent);
+    font:600 clamp(10px,2.2vmin,14px)/1 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    letter-spacing:.08em;
+  }
+  .cell[data-on="1"]{ border-color:#2b5248; box-shadow: 0 0 0 1px rgba(163,255,214,.14) inset; }
+  .alt{
+    position:absolute; inset:auto 6px 6px 6px; opacity:.0;
+    font: 10px/1.1 ui-monospace,monospace; color:#7aa; letter-spacing:.06em;
+    transition: opacity .18s ease;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .gaze .cell .alt{ opacity:.9 }
+  .status{ color:var(--dim); font: 12px/1.3 ui-monospace,monospace }
+  .kbd{ display:inline-grid; place-items:center; min-width:1.5em; padding:.15em .4em; border:1px solid #232336; border-bottom-color:#1a1a27;
+        border-radius:6px; background:#101019; color:#b9bed1; font:600 11px/1 ui-monospace; }
+  .controls{ display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center }
+  .controls code{color:#cfe}
+  .log{max-height:42vh; overflow:auto; scrollbar-width:thin}
+  .log li{margin:0 0 6px 0; list-style:none; font: 12px/1.35 ui-monospace,monospace; color:#cbd1e6}
+  .log time{color:#8d93a7}
+  footer{padding:20px clamp(14px,4vw,32px) 40px; color:var(--dim)}
+  .sotto{opacity:.7}
+  .cta a{color:var(--accent); text-decoration:none}
+  .cta a:hover{text-decoration:underline}
+  .divider{height:1px; background:linear-gradient(90deg, transparent, #1b1b27 20%, #1b1b27 80%, transparent); margin:10px 0 14px}
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="crumbs"><a href="/">volumeinthevoid.com</a> / lattice</div>
+      <h1>Lattice <span class="tagline">· my volume fills this void</span></h1>
+    </div>
+    <div class="status" id="status" aria-live="polite">loading…</div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Inscription Grid</h2>
+      <div id="lattice" class="lattice" role="grid" aria-label="Lattice grid"></div>
+      <div class="divider"></div>
+      <div class="controls">
+        <span class="status">seed=<code id="seedOut"></code></span>
+        <span class="sotto">·</span>
+        <span><span class="kbd">G</span> gaze</span>
+        <span><span class="kbd">P</span> prime-hum</span>
+        <span><span class="kbd">←/→</span> size</span>
+        <span><span class="kbd">.</span> annotate</span>
+        <span><span class="kbd">S</span> share</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <h2>Ledger</h2>
+      <ul id="log" class="log" aria-live="polite" aria-relevant="additions"></ul>
+      <div class="divider"></div>
+      <div class="status">
+        State is bookmarkable. Hash encodes your marks. Press <span class="kbd">S</span> to copy a shareable link.
+      </div>
+      <div class="divider"></div>
+      <div class="cta">
+        <span>Other pages: </span>
+        <a href="/witness">/witness</a>
+        <span class="sotto">·</span>
+        <a href="/symphony">/symphony</a>
+        <span class="sotto">·</span>
+        <a href="/mirror">/mirror</a>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <div class="status">Tip: cells render a <em>prime glyph</em> from the current seed. Toggle <span class="kbd">G</span> to reveal alt-annotations (your “gaze”).</div>
+  </footer>
+
+<script>
+(function(){
+  const url = new URL(location.href);
+  const seedParam = parseInt(url.searchParams.get('seed')||'',10);
+  const seed = Number.isFinite(seedParam) ? seedParam : Math.floor(1000*Math.random()+37);
+  const status = document.getElementById('status');
+  const seedOut = document.getElementById('seedOut');
+  const grid = document.getElementById('lattice');
+  const log = document.getElementById('log');
+  document.getElementById('seedOut').textContent = seed;
+
+  // --- utilities
+  const clamp = (n, a, b)=>Math.max(a, Math.min(b, n));
+  const isPrime = (n)=>{
+    if(n<2) return false;
+    if(n%2===0) return n===2;
+    for(let i=3;i*i<=n;i+=2) if(n%i===0) return false;
+    return true;
+  };
+  const nextPrime = (n)=>{ let k=Math.max(2,n|0); while(!isPrime(k)) k++; return k; };
+  const primes = [37,41,43,47,53,59,61,67,71,73,79,83,89,97];
+
+  // derive grid size from seed (pleasant squares only)
+  const sizes = [7,9,11,13];
+  let size = sizes[(seed % sizes.length)];
+  let humOn = false;
+
+  // decode existing marks from hash
+  const hashState = ()=>{
+    const h = new URL(location.href).hash.replace(/^#/,'');
+    const obj = Object.fromEntries(new URLSearchParams(h));
+    return {
+      n: parseInt(obj.n||'0',10)||0,
+      marks: (obj.m||'').split(',').filter(Boolean).map(s=>parseInt(s,10)).filter(Number.isFinite)
+    };
+  };
+  const encodeHash = (marks)=>{
+    const params = new URLSearchParams();
+    params.set('n', size);
+    if(marks.length) params.set('m', marks.join(','));
+    history.replaceState(null,'', location.pathname + location.search + '#' + params.toString());
+  };
+
+  let marks = new Set(hashState().marks);
+
+  function logLine(text){
+    const li = document.createElement('li');
+    const t = document.createElement('time');
+    t.textContent = new Date().toLocaleTimeString();
+    li.appendChild(t);
+    li.insertAdjacentText('beforeend', ' — ' + text);
+    log.appendChild(li);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function glyphFor(i){
+    const p = nextPrime(seed + i + marks.size);
+    const alphabet = "▢◦◇△○◇◆▲□◆";
+    const g = alphabet[p % alphabet.length];
+    return g;
+  }
+
+  function render(){
+    grid.classList.toggle('gaze', document.body.classList.contains('gaze'));
+    grid.style.gridTemplateColumns = `repeat(${size}, var(--cell))`;
+    grid.innerHTML = '';
+    const total = size*size;
+
+    for(let i=0;i<total;i++){
+      const cell = document.createElement('button');
+      cell.type='button';
+      cell.className='cell';
+      cell.setAttribute('role','gridcell');
+      cell.setAttribute('aria-label', `cell ${i+1}`);
+      cell.dataset.index = i;
+      const on = marks.has(i) ? '1' : '0';
+      cell.dataset.on = on;
+
+      const mk = document.createElement('mark');
+      mk.textContent = marks.has(i) ? glyphFor(i) : '·';
+      cell.appendChild(mk);
+
+      const alt = document.createElement('span');
+      alt.className='alt';
+      alt.textContent = `i=${i} p=${nextPrime(seed+i)} ${marks.has(i)?'· inscribed':''}`;
+      cell.appendChild(alt);
+
+      cell.addEventListener('click', ()=>{
+        if(marks.has(i)) { marks.delete(i); logLine(`erased @ ${i}`); }
+        else             { marks.add(i);    logLine(`inscribed @ ${i} → ${glyphFor(i)}`); }
+        encodeHash(Array.from(marks).sort((a,b)=>a-b));
+        render();
+      });
+
+      grid.appendChild(cell);
+    }
+    status.textContent = `lattice ${size}×${size} · ${marks.size} mark${marks.size===1?'':'s'}`;
+  }
+
+  // prime-hum: simple WebAudio oscillator with prime-stepped detune
+  let ctx, o, g;
+  function toggleHum(){
+    if(humOn){ if(o){o.stop();o.disconnect();} if(g){g.disconnect();} humOn=false; status.textContent += ' · hum:off'; return; }
+    try{
+      ctx = ctx || new (window.AudioContext||window.webkitAudioContext)();
+      o = ctx.createOscillator();
+      g = ctx.createGain(); g.gain.value = 0.02;
+      o.type='sine';
+      const base = 110; // A2
+      const p = primes[(seed + marks.size) % primes.length];
+      o.frequency.value = base * (p/37);
+      o.connect(g).connect(ctx.destination);
+      o.start();
+      humOn=true; status.textContent += ' · hum:on';
+    }catch(e){ logLine('audio unavailable'); }
+  }
+
+  // keyboard
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='g' || e.key==='G'){ document.body.classList.toggle('gaze'); render(); }
+    else if(e.key==='p' || e.key==='P'){ toggleHum(); }
+    else if(e.key==='ArrowRight'){ size = sizes[clamp(sizes.indexOf(size)+1,0,sizes.length-1)]; render(); }
+    else if(e.key==='ArrowLeft'){ size = sizes[clamp(sizes.indexOf(size)-1,0,sizes.length-1)]; render(); }
+    else if(e.key==='.' ){ // annotate current state minimally
+      logLine(`snapshot seed=${seed} size=${size} marks=${marks.size}`);
+    }
+    else if(e.key==='s' || e.key==='S'){
+      encodeHash(Array.from(marks).sort((a,b)=>a-b));
+      const link = location.href;
+      navigator.clipboard?.writeText(link);
+      logLine('link copied to clipboard');
+    }
+  }, {passive:true});
+
+  // initial
+  render();
+  logLine(`seed=${seed} · prime=${nextPrime(seed)} · ready`);
+
+  // restore from hash on navigation
+  window.addEventListener('hashchange', ()=>{
+    const state = hashState();
+    size = clamp(state.n||size, Math.min(...sizes), Math.max(...sizes));
+    marks = new Set(state.marks||[]);
+    render();
+  });
+
+})();
+</script>
+</body>
+</html>
